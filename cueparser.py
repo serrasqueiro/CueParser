@@ -110,6 +110,8 @@ class CueSheet():
         self.back()
 
     def setOutputFormat(self, outputFormat, trackOutputFormat=""):
+        print(":::", outputFormat.replace('\n', '\\n'))
+        print(":::", trackOutputFormat.replace('\n', '\\n'))
         self.outputFormat = outputFormat
         self.trackOutputFormat = trackOutputFormat
 
@@ -129,6 +131,7 @@ class CueSheet():
     def __repr__(self):
         ret = self.outputFormat
         for field in CueSheet._fields:
+            print("::: Debug:", type(field), "is '{}'".format(field))
             if getattr(self, field):
                 ret = ret.replace("%{}%".format(field), getattr(self, field))
 
@@ -214,9 +217,10 @@ def main():
                         default="%performer% - %title%")
     parser.add_argument("-o", "--offset", help="fetch offset's track")
     parser.add_argument("-n", "--number", help="fetch track by number")
-    parser.add_argument("-a", "--all", help="fetch all tracks", default=True)
+    #parser.add_argument("-a", "--all", help="fetch all tracks", default=True)
     parser.add_argument("file", help="path to cue file")
     args = parser.parse_args()
+    args.all = False
 
     cuefile = args.file
     if not os.path.isfile(cuefile):
@@ -229,7 +233,7 @@ def main():
         cuesheet.setData(f.read().decode(sys.stdout.encoding))
 
     cuesheet.parse()
-    try:
+    if True:
         if (args.offset):
             offset = offsetToTimedelta(args.offset)
             print((cuesheet.getTrackByTime(offset)))
@@ -237,12 +241,11 @@ def main():
             num = int(args.number)
             print((cuesheet.getTrackByNumber(num)))
         elif (args.all):
+            print("DEBUG", "args.all:")
             print_all_tracks(cuesheet)
         else:
+            print("DEBUG", "cuesheet.output():")
             print((cuesheet.output()))
-    except ValueError:
-        print("Cannot parse int")
-        exit()
 
 
 def print_all_tracks(cuesheet, i=0):
